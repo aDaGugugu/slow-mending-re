@@ -1,0 +1,20 @@
+Command:
+  text:
+    help:
+      - --
+      - §bSlow mending - 帮助 -
+      - §3§m===============§b-//§f§l  Slow Mending  §b\\-§3§m==================
+      - /slowmending add <player> <num> 增加/减少当前持有物品的剩余修补次数。
+      - /slowmending help 显示帮助。
+      - /slowmending version 显示版本信息。
+      - /slowmending set <num> 设置当前持有物品的剩余修补次数。
+      - /slowmending reload 重载插件。
+      - §b§m=============================================
+      - --
+    version:
+      - --
+      - §bSlow mending - 版本信息 -
+      - §e§m=============================================
+      -   §3§lSlow mending  §r§7v§f1.1.8    §6by§f-§b super_boy_520
+      - §e§m=============================================
+      - --

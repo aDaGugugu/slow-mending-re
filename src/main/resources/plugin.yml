@@ -1,0 +1,16 @@
+name: slow_mending_re
+version: '${project.version}'
+main: org.sbbpl.plugins.Slow_mending_re
+api-version: '1.20'
+author: super_boy_520
+
+
+permissions:
+  slowmending.command:
+    default: op
+commands:
+  slowmending:
+    description: A plugin that mack mend slower and expensive than before.
+    usage: /slowmending <set|reload|version|help>
+    aliases: slmend
+    permission: slowmending.command
