@@ -7,6 +7,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 
 public final class Slow_mending_re extends JavaPlugin {
@@ -78,6 +79,12 @@ public final class Slow_mending_re extends JavaPlugin {
     }
 
 
+    //曾用名列表
+    private static List<String> Old_Mend_Frequency_Lore_Name;
+    public static List<String> getOld_Mend_Frequency_Lore_Name() {
+        return Old_Mend_Frequency_Lore_Name;
+    }
+
     @Override
     public void onEnable() {
         // Plugin startup logic
@@ -92,6 +99,9 @@ public final class Slow_mending_re extends JavaPlugin {
 
         //注册监听器
         Bukkit.getPluginManager().registerEvents(new EventListener(), this);
+
+        //注册命令监听器
+        Bukkit.getPluginCommand("slowmending").setExecutor(new SLMCommand());
 
         //初始化配置文件:
         //config配置
@@ -133,16 +143,11 @@ public final class Slow_mending_re extends JavaPlugin {
         if (this.getConfig().contains("Setting.AHI_Mend")){
             try {
                 AHI_Mend = getConfig().getBoolean("Setting.AHI_Mend");
-                System.out.println(0);
-                System.out.println(AHI_Mend);
             }catch (NullPointerException exception){
-                System.out.println(1);
                 AHI_Mend = true;
             }
-        }else {
-            AHI_Mend = true;
-            System.out.println(2);
-        }
+        }else AHI_Mend = true;
+
 
         //加载slowmend相关项:
         //是否启用
@@ -184,6 +189,8 @@ public final class Slow_mending_re extends JavaPlugin {
                     Max_Mend_Limit_Number = 1000;
                 }
             }else Max_Mend_Limit_Number = 1000;
+
+
             //加载是否启用发送破损信息
             if (this.getConfig().contains("Setting.Max_Mend_Limit.Deactivate_Message")){
                 try {
@@ -224,7 +231,18 @@ public final class Slow_mending_re extends JavaPlugin {
                     Mend_Frequency_Lore_Name = null;
                     throw new Exception("请检查配置文件Mend_Frequency_Lore_Name！！！,无法读取！");
                 }
-            }else throw new Exception("请检查配置文件Mend_Frequency_Lore_Name！！！，位置为空！");
+            }else {
+                Mend_Frequency_Lore_Name = null;
+                throw new Exception("请检查配置文件Mend_Frequency_Lore_Name！！！，位置为空！");
+            }
+            //加载旧名称
+            if (this.getConfig().contains("Setting.Max_Mend_Limit.Old_Mend_Frequency_Lore_Name")){
+                try {
+                    Old_Mend_Frequency_Lore_Name = getConfig().getStringList("Setting.Max_Mend_Limit.Old_Mend_Frequency_Lore_Name");
+                }catch (NullPointerException exception){
+                    this.getLogger().warning("无法加载Old_Mend_Frequency_Lore_Name！请检查配置确保没有非法内容！");
+                }
+            }
         }
     }
 }

@@ -18,7 +18,6 @@ public class EventListener implements Listener {
         int remainderMendFrequency = -4;
 
         //判断是否启用了全局经验修补
-        System.out.println(Slow_mending_re.isAHI_Mend());
         if(!Slow_mending_re.isAHI_Mend()) {
             //如果没有启用，就取消事件，然后结束
             playerItemMendEvent.setCancelled(true);
@@ -42,7 +41,7 @@ public class EventListener implements Listener {
 
             //获取次数然
             try{
-                remainderMendFrequency = MendingItem.getRemainderMendFrequency(playerItemMendEvent.getItem().getItemMeta(), Slow_mending_re.getMend_Frequency_Lore_Name());
+                remainderMendFrequency = MendingItem.getRemainderMendFrequency(playerItemMendEvent.getItem().getItemMeta(), Slow_mending_re.getMend_Frequency_Lore_Name(),Slow_mending_re.getOld_Mend_Frequency_Lore_Name());
             }catch (NoSuchFieldException exception){
                 //如果未找到对应lore
                 //创建一个lore存储然后给它的上限减一
@@ -73,7 +72,7 @@ public class EventListener implements Listener {
                         //大于0，将剩余减一
                         try{
                             //将lor减一
-                            ItemMeta itemMeta = MendingItem.addRemainderMendFrequency(playerItemMendEvent.getItem().getItemMeta(), Slow_mending_re.getMend_Frequency_Lore_Name(), -1);
+                            ItemMeta itemMeta = MendingItem.addRemainderMendFrequency(playerItemMendEvent.getItem().getItemMeta(), Slow_mending_re.getMend_Frequency_Lore_Name(), -1, Slow_mending_re.getOld_Mend_Frequency_Lore_Name());
                             //修改玩家物品
                             playerItemMendEvent.getItem().setItemMeta(itemMeta);
                         }catch (NoSuchFieldException exception){
@@ -111,7 +110,6 @@ public class EventListener implements Listener {
             //随机获取一个数用于判断是否进行修补
             Random radInt = new Random();
             int radMendFactor = radInt.nextInt(Mitigation_Factor);
-            System.out.println(radMendFactor);
             //判断是否为0，如果为否，取消事件，然后结束
             if (!(radMendFactor == 0)){
                 playerItemMendEvent.setCancelled(true);
