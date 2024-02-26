@@ -11,6 +11,5 @@ permissions:
 commands:
   slowmending:
     description: A plugin that mack mend slower and expensive than before.
-    usage: /slowmending <set|reload|version|help>
     aliases: slmend
     permission: slowmending.command

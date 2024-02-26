@@ -38,4 +38,4 @@ Setting:
 
     #旧名称，列表内的名称将与正常名称一起生效减少次数，但无法进行其他操作。
     Old_Mend_Frequency_Lore_Name:
-      #-
+    #- "123："

@@ -3,12 +3,13 @@ Command:
     help:
       - --
       - §bSlow mending - 帮助 -
-      - §3§m===============§b-//§f§l  Slow Mending  §b\\-§3§m==================
-      - /slowmending add <player> <num> 增加/减少当前持有物品的剩余修补次数。
-      - /slowmending help 显示帮助。
-      - /slowmending version 显示版本信息。
-      - /slowmending set <num> 设置当前持有物品的剩余修补次数。
-      - /slowmending reload 重载插件。
+      - §3§m============§b-//§f§lSlow Mending§b\\-§3§m===============
+      - /slmend add <player> <num> [main\off] §e增加/减少当前持有物品的剩余修补次数。
+      - /slmend help §e显示帮助。
+      - /slmend version §e显示版本信息。
+      - /slmend set <player> <num> [main\off] §e设置当前持有物品的剩余修补次数。
+      - /slmend reload §e重载插件。
+      - /slmend givecard <player> <num> <frequency> §e给予玩家经验修补拓展卡。
       - §b§m=============================================
       - --
     version:

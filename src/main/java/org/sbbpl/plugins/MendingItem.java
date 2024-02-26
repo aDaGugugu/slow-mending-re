@@ -18,7 +18,6 @@ public class MendingItem {
         //遍历列表，找到存储mend数据的lore
         int frequency;//定义数据变量
         for (String lore : rawLore){
-            System.out.println(oldNames);
             //寻找名称
             if (lore.startsWith(mendFrequencyLoreName)){//找到
                 //截取数据并进行转换
@@ -27,7 +26,6 @@ public class MendingItem {
             }
             //寻找旧名称
             for (String oldname : oldNames){
-                System.out.println(oldname);
                 if (lore.startsWith(oldname)){//找到
                     //读取名称
                     frequency = Integer.parseInt(lore.substring(oldname.length()));
@@ -36,6 +34,7 @@ public class MendingItem {
             }
         }
         throw new NoSuchFieldException();//未找到对应lore
+
     }
 
     //创建一个lore用于存储剩余次数并赋值
@@ -58,12 +57,9 @@ public class MendingItem {
         if (!itemMeta.hasLore()) throw new NoSuchFieldException();
         //获取lore列表
         List<String> rawLore = itemMeta.getLore();
-        System.out.println("rawl:"+rawLore);
         //遍历列表，找到存储mend数据的lore
-        for (int i = 0 ; i <= rawLore.size() ;i++){
-            System.out.println("i:"+i);
+        for (int i = 0 ; i <= rawLore.size()-1 ;i++){
             String lore = rawLore.get(i);
-            System.out.println("lore:"+lore);
             if (lore.startsWith(mendFrequencyLoreName)){//找到
                 //构建新lore
                 String newlore;
@@ -73,15 +69,14 @@ public class MendingItem {
                 itemMeta.setLore(rawLore);
                 return itemMeta;
             }
+            //没找到
             //寻找旧名称
             for (String oldname : oldNames){
-                System.out.println(oldname);
                 if (lore.startsWith(oldname)){//找到
                     //删除原名称
                     rawLore.remove(i);
                     itemMeta.setLore(rawLore);
                     return createRemainderMendFrequency(itemMeta,mendFrequencyLoreName,setNum);
-
                 }
             }
         }
@@ -118,6 +113,21 @@ public class MendingItem {
     }
 
     public static boolean checkWhitelist(ItemMeta itemMeta ,List<String> name){
+        return false;
+    }
+
+    public static boolean isHasMendFrequency(ItemMeta itemMeta,String mendFrequencyLoreName){
+        //判断是否存在lore
+        if (!itemMeta.hasLore()) return false;
+        //获取lore列表
+        List<String> rawLore = itemMeta.getLore();
+        //遍历列表，找到存储mend数据的lore
+        for (int i = 0 ; i <= rawLore.size()-1 ;i++) {
+            String lore = rawLore.get(i);
+            if (lore.startsWith(mendFrequencyLoreName)) {//找到
+                return true;
+            }
+        }
         return false;
     }
 }

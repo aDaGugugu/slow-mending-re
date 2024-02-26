@@ -77,7 +77,7 @@ public class EventListener implements Listener {
                             playerItemMendEvent.getItem().setItemMeta(itemMeta);
                         }catch (NoSuchFieldException exception){
                             //不应该到达的地方！
-                            System.out.println(exception.toString());
+                            System.out.println(exception);
                         }
                     }else {//如果数量耗尽，禁止修复
                         playerItemMendEvent.setCancelled(true);
