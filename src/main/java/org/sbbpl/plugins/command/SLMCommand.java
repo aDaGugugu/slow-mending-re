@@ -22,6 +22,16 @@ public class SLMCommand implements CommandExecutor {
                 return false;
             }
         }
+
+        if (args.length == 0){
+            if (commandSender instanceof Player) {
+                com_help.playerHelp((Player) commandSender);
+            } else if (commandSender instanceof ConsoleCommandSender) {
+                com_help.consHelp();
+            }
+            return true;
+        }
+
         //开始命令判断
         switch (args[0]){
             case ("reload") ->{
@@ -29,14 +39,6 @@ public class SLMCommand implements CommandExecutor {
                     com_reload.playerReload((Player) commandSender);
                 } else if (commandSender instanceof ConsoleCommandSender) {
                     com_reload.consReload();
-                }
-                return true;
-            }
-            case ("help"), ("") ->{
-                if (commandSender instanceof Player) {
-                    com_help.playerHelp((Player) commandSender);
-                } else if (commandSender instanceof ConsoleCommandSender) {
-                    com_help.consHelp();
                 }
                 return true;
             }
@@ -170,7 +172,11 @@ public class SLMCommand implements CommandExecutor {
                         return true;
                     }
                 }catch (Exception e){
-
+                    if (commandSender instanceof Player) {
+                        commandSender.sendMessage("§c玩家未找到！");
+                    } else if (commandSender instanceof ConsoleCommandSender) {
+                        SLM.getLogger().info("玩家未找到!");
+                    }
                 }
 
                 //读取次数
