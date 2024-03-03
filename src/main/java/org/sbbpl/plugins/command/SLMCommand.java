@@ -1,5 +1,7 @@
 package org.sbbpl.plugins.command;
 
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -199,6 +201,48 @@ public class SLMCommand implements CommandExecutor {
                     com_add.consAdd(targetPlayer,num,hand);
                 }
                 return true;
+            }
+            //give
+            case ("givecard") ->{
+                //检测sender
+                if (!(commandSender instanceof Player)){
+                    SLM.getLogger().info("不能为非玩家执行！");
+                    return true;
+                }
+
+                //检测长度
+                if (args.length != 5){
+                    commandSender.sendMessage("§c命令长度错误！");
+                    return true;
+                }
+
+                //检测主手
+                if (((Player) commandSender).getEquipment().getItemInMainHand().getType() != Material.AIR){
+                    commandSender.sendMessage("§c请将移除主手物品。");
+                    return true;
+                }
+                //获取玩家并执行
+                try{
+                    Player player = Bukkit.getPlayer(args[1]);
+                    int num = Integer.parseInt(args[2]);
+                    int frequency = Integer.parseInt(args[3]);
+                    boolean isset;
+                    if (args[4].equals("set")) {
+                        isset = true;
+                    } else if (args[4].equals("add")) {
+                        isset = false;
+                    } else {
+                        commandSender.sendMessage("§c模式参数错误！");
+                        return true;
+                    }
+                    com_give.give(player, frequency, isset, num);
+                    commandSender.sendMessage("§b成功给予物品。");
+                    return true;
+                }catch (Exception e){
+                    commandSender.sendMessage("§c参数错误！");
+                    return true;
+                }
+
             }
             default -> {
                 if (commandSender instanceof Player) {

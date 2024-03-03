@@ -17,19 +17,24 @@ public class CommandTabCompleter implements TabCompleter {
             com.add("set");
             com.add("reload");
             com.add("add");
+            com.add("givecard");
             return com;
         }
         if (strings.length == 2){
             switch (strings[0]){
-                case ("set") ,("add") ->{
+                case ("set") ,("add"), ("givecard") ->{
                     return null;
                 }
             }
         }
         if (strings.length == 3){
             switch (strings[0]){
-                case ("set") ,("add") ->{
+                case ("set") ,("add")->{
                     com.add("<次数>");
+                    return com;
+                }
+                case ("givecard") ->{
+                    com.add("<数量>");
                     return com;
                 }
             }
@@ -39,6 +44,19 @@ public class CommandTabCompleter implements TabCompleter {
                 case ("set") ,("add") ->{
                     com.add("off");
                     com.add("main");
+                    return com;
+                }
+                case ("givecard") ->{
+                    com.add("<次数>");
+                    return com;
+                }
+            }
+        }
+        if (strings.length == 5){
+            switch (strings[0]){
+                case ("givecard") ->{
+                    com.add("set");
+                    com.add("add");
                     return com;
                 }
             }

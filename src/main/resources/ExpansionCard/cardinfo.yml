@@ -1,0 +1,10 @@
+text:
+  name: §3§l经验修补拓展卡
+  useway:
+    - §e使用方法§f：
+    - §f将要操作的物品放在副手
+    - §f主手拿着拓展卡
+    - §f右键使用拓展卡
+  set_mode: §e模式§f：§b设置
+  add_mode: §e模式§f：§b增加
+  frequency: §e修改次数§f：§3

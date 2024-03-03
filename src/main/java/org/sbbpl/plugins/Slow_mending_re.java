@@ -3,6 +3,8 @@ package org.sbbpl.plugins;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.sbbpl.plugins.ExpansionCard.CardListener;
+import org.sbbpl.plugins.ExpansionCard.ExpansionCard;
 import org.sbbpl.plugins.command.CommandTabCompleter;
 import org.sbbpl.plugins.command.SLMCommand;
 
@@ -131,6 +133,17 @@ public final class Slow_mending_re extends JavaPlugin implements CommandExecutor
         return SLM;
     }
 
+    //拓展卡
+    //是否启用
+    private static boolean enableCard;
+    public static boolean isEnableCard() {
+        return enableCard;
+    }
+    public static void setEnableCard(boolean enableCard) {
+        Slow_mending_re.enableCard = enableCard;
+    }
+
+
     @Override
     public void onEnable() {
         // Plugin startup logic
@@ -160,6 +173,14 @@ public final class Slow_mending_re extends JavaPlugin implements CommandExecutor
         saveDefaultConfig();
         //command配置
         this.saveResource("command.yml", false);
+        //card配置
+        this.saveResource("ExpansionCard/cardinfo.yml", false);
+        this.saveResource("ExpansionCard/cardconfig.yml", false);
+
+        //注册card监听器
+        if (ExpansionCard.isEnable()){
+            Bukkit.getPluginManager().registerEvents(new CardListener(), this);
+        }
 
         //开始加载配置
         try {
