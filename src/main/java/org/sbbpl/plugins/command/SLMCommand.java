@@ -26,7 +26,7 @@ public class SLMCommand implements CommandExecutor {
         if (args.length == 0){
             if (commandSender instanceof Player) {
                 com_help.playerHelp((Player) commandSender);
-            } else if (commandSender instanceof ConsoleCommandSender) {
+            } else {
                 com_help.consHelp();
             }
             return true;
@@ -45,7 +45,7 @@ public class SLMCommand implements CommandExecutor {
             case ("version") ->{
                 if (commandSender instanceof Player){
                     com_version.playerVersion((Player) commandSender);
-                } else if (commandSender instanceof ConsoleCommandSender) {
+                } else {
                     com_version.consVersion();
                 }
                 return true;
@@ -70,7 +70,7 @@ public class SLMCommand implements CommandExecutor {
                     else {
                         if (commandSender instanceof Player) {
                             commandSender.sendMessage("§c命令参数错误！");
-                        } else if (commandSender instanceof ConsoleCommandSender) {
+                        } else {
                             SLM.getLogger().info("命令参数错误!");
                         }
                         return true;
@@ -78,7 +78,7 @@ public class SLMCommand implements CommandExecutor {
                 }else {
                     if (commandSender instanceof Player) {
                         commandSender.sendMessage("§c命令长度错误！");
-                    } else if (commandSender instanceof ConsoleCommandSender) {
+                    } else {
                         SLM.getLogger().info("命令长度错误!");
                     }
                     return true;
@@ -91,7 +91,7 @@ public class SLMCommand implements CommandExecutor {
                     if (targetPlayer == null){
                         if (commandSender instanceof Player) {
                             commandSender.sendMessage("§c玩家未找到！");
-                        } else if (commandSender instanceof ConsoleCommandSender) {
+                        } else {
                             SLM.getLogger().info("玩家未找到!");
                         }
                         return true;
@@ -99,7 +99,7 @@ public class SLMCommand implements CommandExecutor {
                 }catch (Exception e){
                     if (commandSender instanceof Player) {
                         commandSender.sendMessage("§c玩家未找到！");
-                    } else if (commandSender instanceof ConsoleCommandSender) {
+                    } else {
                         SLM.getLogger().info("玩家未找到!");
                     }
                     return true;
@@ -112,7 +112,7 @@ public class SLMCommand implements CommandExecutor {
                 }catch (Exception e){
                     if (commandSender instanceof Player) {
                         commandSender.sendMessage("§c次数错误！");
-                    } else if (commandSender instanceof ConsoleCommandSender) {
+                    } else {
                         SLM.getLogger().info("次数错误!");
                     }
                     return true;
@@ -121,7 +121,7 @@ public class SLMCommand implements CommandExecutor {
                 //调用
                 if (commandSender instanceof Player) {
                     com_set.playerSet(targetPlayer,num,(Player)commandSender,hand);
-                } else if (commandSender instanceof ConsoleCommandSender) {
+                } else {
                     com_set.consSet(targetPlayer,num,hand);
                 }
                 return true;
@@ -145,7 +145,7 @@ public class SLMCommand implements CommandExecutor {
                     else {
                         if (commandSender instanceof Player) {
                             commandSender.sendMessage("§c命令参数错误！");
-                        } else if (commandSender instanceof ConsoleCommandSender) {
+                        } else {
                             SLM.getLogger().info("命令参数错误!");
                         }
                         return true;
@@ -153,7 +153,7 @@ public class SLMCommand implements CommandExecutor {
                 }else {
                     if (commandSender instanceof Player) {
                         commandSender.sendMessage("§c命令长度错误！");
-                    } else if (commandSender instanceof ConsoleCommandSender) {
+                    } else {
                         SLM.getLogger().info("命令长度错误!");
                     }
                     return true;
@@ -166,7 +166,7 @@ public class SLMCommand implements CommandExecutor {
                     if (targetPlayer == null){
                         if (commandSender instanceof Player) {
                             commandSender.sendMessage("§c玩家未找到！");
-                        } else if (commandSender instanceof ConsoleCommandSender) {
+                        } else {
                             SLM.getLogger().info("玩家未找到!");
                         }
                         return true;
@@ -174,7 +174,7 @@ public class SLMCommand implements CommandExecutor {
                 }catch (Exception e){
                     if (commandSender instanceof Player) {
                         commandSender.sendMessage("§c玩家未找到！");
-                    } else if (commandSender instanceof ConsoleCommandSender) {
+                    } else {
                         SLM.getLogger().info("玩家未找到!");
                     }
                 }
@@ -186,7 +186,7 @@ public class SLMCommand implements CommandExecutor {
                 }catch (Exception e){
                     if (commandSender instanceof Player) {
                         commandSender.sendMessage("§c次数错误！");
-                    } else if (commandSender instanceof ConsoleCommandSender) {
+                    } else {
                         SLM.getLogger().info("次数错误!");
                     }
                     return true;
@@ -195,7 +195,7 @@ public class SLMCommand implements CommandExecutor {
                 //调用
                 if (commandSender instanceof Player) {
                     com_add.playerAdd(targetPlayer,num,(Player)commandSender,hand);
-                } else if (commandSender instanceof ConsoleCommandSender) {
+                } else {
                     com_add.consAdd(targetPlayer,num,hand);
                 }
                 return true;
@@ -203,7 +203,7 @@ public class SLMCommand implements CommandExecutor {
             default -> {
                 if (commandSender instanceof Player) {
                     com_help.playerHelp((Player) commandSender);
-                } else if (commandSender instanceof ConsoleCommandSender) {
+                } else {
                     com_help.consHelp();
                 }
                 return true;
