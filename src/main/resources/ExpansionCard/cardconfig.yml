@@ -1,0 +1,10 @@
+ExpansionCard:
+
+  #是否启用拓展卡
+  Enable: true
+
+  #是否允许超出设定的限制
+  AllowBeyond: true
+
+  #是否允许设定特殊值
+  AllowSetSP: true

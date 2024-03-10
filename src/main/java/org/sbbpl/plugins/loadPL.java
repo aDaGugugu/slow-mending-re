@@ -1,5 +1,10 @@
 package org.sbbpl.plugins;
 
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.sbbpl.plugins.ExpansionCard.ExpansionCard;
+
+import java.io.File;
+
 public class loadPL {
     public static void loadPlugins() throws Exception {
         //加载超类
@@ -116,6 +121,41 @@ public class loadPL {
                 }catch (NullPointerException exception){
                     SLM.getLogger().warning("无法加载Old_Mend_Frequency_Lore_Name！请检查配置确保没有非法内容！");
                 }
+            }
+        }
+        //加载卡片
+        File cardConfigfile = new File(SLM.getDataFolder(), "ExpansionCard/cardconfig.yml");
+        YamlConfiguration cardConfig = YamlConfiguration.loadConfiguration(cardConfigfile);
+        //是否启用
+        if (cardConfig.contains("ExpansionCard.Enable")){
+            try {
+                ExpansionCard.setEnable(cardConfig.getBoolean("ExpansionCard.Enable"));
+            }catch (NullPointerException exception){
+                SLM.getLogger().warning("无法加载ExpansionCard.Enable！请检查配置确保没有非法内容！");
+            }
+        }else {
+            throw new Exception("请检查配置文件ExpansionCard.Enable！！！，位置为空！");
+        }
+        if (ExpansionCard.isEnable()) {
+            //加载是否允许超出
+            if (cardConfig.contains("ExpansionCard.AllowBeyond")){
+                try {
+                    ExpansionCard.setAllowBeyond(cardConfig.getBoolean("ExpansionCard.AllowBeyond"));
+                }catch (NullPointerException exception){
+                    SLM.getLogger().warning("无法加载ExpansionCard.AllowBeyond！请检查配置确保没有非法内容！");
+                }
+            }else {
+                throw new Exception("请检查配置文件ExpansionCard.AllowBeyond！！！，位置为空！");
+            }
+            //加载是否允许特殊值
+            if (cardConfig.contains("ExpansionCard.AllowSetSP")){
+                try {
+                    ExpansionCard.setAllowSetSP(cardConfig.getBoolean("ExpansionCard.AllowSetSP"));
+                }catch (NullPointerException exception){
+                    SLM.getLogger().warning("无法加载ExpansionCard.AllowSetSP！请检查配置确保没有非法内容！");
+                }
+            }else {
+                throw new Exception("请检查配置文件ExpansionCard.AllowSetSP！！！，位置为空！");
             }
         }
     }
