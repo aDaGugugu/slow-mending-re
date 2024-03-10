@@ -133,16 +133,6 @@ public final class Slow_mending_re extends JavaPlugin implements CommandExecutor
         return SLM;
     }
 
-    //拓展卡
-    //是否启用
-    private static boolean enableCard;
-    public static boolean isEnableCard() {
-        return enableCard;
-    }
-    public static void setEnableCard(boolean enableCard) {
-        Slow_mending_re.enableCard = enableCard;
-    }
-
 
     @Override
     public void onEnable() {
@@ -161,6 +151,7 @@ public final class Slow_mending_re extends JavaPlugin implements CommandExecutor
 
         //注册监听器
         Bukkit.getPluginManager().registerEvents(new EventListener(), this);
+        Bukkit.getPluginManager().registerEvents(new CardListener(),this);
 
         //注册命令监听器
         Bukkit.getPluginCommand("slowmending").setExecutor(new SLMCommand());

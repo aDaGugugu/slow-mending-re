@@ -14,6 +14,8 @@ public class com_reload{
         try {
             SLM.saveDefaultConfig();
             SLM.saveResource("command.yml", false);
+            SLM.saveResource("ExpansionCard/cardinfo.yml", false);
+            SLM.saveResource("ExpansionCard/cardconfig.yml", false);
             SLM.reloadConfig();
             loadPL.loadPlugins();
             SLM.getLogger().info("重载完毕！");
@@ -28,6 +30,10 @@ public class com_reload{
         Slow_mending_re SLM = Slow_mending_re.getSLM();
         SLM.getLogger().info("正在重载插件...");
         try {
+            SLM.saveDefaultConfig();
+            SLM.saveResource("command.yml", false);
+            SLM.saveResource("ExpansionCard/cardinfo.yml", false);
+            SLM.saveResource("ExpansionCard/cardconfig.yml", false);
             SLM.reloadConfig();
             loadPL.loadPlugins();
             SLM.getLogger().info("重载完毕！");
