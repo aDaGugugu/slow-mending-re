@@ -3,6 +3,7 @@ package org.sbbpl.plugins.command;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
+import org.sbbpl.plugins.Slow_mending_re;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -31,10 +32,14 @@ public class CommandTabCompleter implements TabCompleter {
             switch (strings[0]){
                 case ("set") ,("add")->{
                     com.add("<次数>");
+                    com.add("0");
+                    com.add(String.valueOf(Slow_mending_re.getMax_Mend_Limit_Number()));
                     return com;
                 }
                 case ("givecard") ->{
                     com.add("<数量>");
+                    com.add("1");
+                    com.add("64");
                     return com;
                 }
             }
@@ -48,6 +53,8 @@ public class CommandTabCompleter implements TabCompleter {
                 }
                 case ("givecard") ->{
                     com.add("<次数>");
+                    com.add("0");
+                    com.add(String.valueOf(Slow_mending_re.getMax_Mend_Limit_Number()));
                     return com;
                 }
             }
