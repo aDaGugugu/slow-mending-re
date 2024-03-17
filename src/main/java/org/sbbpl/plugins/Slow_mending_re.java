@@ -150,7 +150,7 @@ public final class Slow_mending_re extends JavaPlugin implements CommandExecutor
         SLM = this;
 
         //注册监听器
-        Bukkit.getPluginManager().registerEvents(new EventListener(), this);
+        Bukkit.getPluginManager().registerEvents(new MendEventListener(), this);
         Bukkit.getPluginManager().registerEvents(new CardListener(),this);
 
         //注册命令监听器

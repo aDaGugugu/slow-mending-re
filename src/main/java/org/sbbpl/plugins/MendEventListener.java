@@ -8,7 +8,7 @@ import org.joml.Random;
 
 import java.util.Objects;
 
-public class EventListener implements Listener {
+public class MendEventListener implements Listener {
 
     @EventHandler
     public void onPlayerPlayerItemMend(PlayerItemMendEvent playerItemMendEvent){
