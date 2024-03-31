@@ -3,7 +3,7 @@ Slow Mending -- A Bukkit server plugin
 ===
 
 Slow Mending is a manage plugin,that allows operators restrict the experience mend of tools. It can let the mend slower,and can restrict the mend amount of any tools.And it also alows player use "Expansion Cards" to add the amount.<br>
-![mendingitem.png](img/2Fmendingitem.png)
+![mendingitem.png](img/mendingitem.png)
 
 Features
 --
