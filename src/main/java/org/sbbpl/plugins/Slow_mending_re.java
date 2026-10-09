@@ -8,10 +8,9 @@ import org.sbbpl.plugins.ExpansionCard.ExpansionCard;
 import org.sbbpl.plugins.command.CommandTabCompleter;
 import org.sbbpl.plugins.command.SLMCommand;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
+import java.io.File;
+import java.util.Objects;
+import java.util.logging.Level;
 import java.util.List;
 
 
@@ -118,7 +117,7 @@ public final class Slow_mending_re extends JavaPlugin implements CommandExecutor
     }
 
     //曾用名列表
-    private static List<String> Old_Mend_Frequency_Lore_Name;
+    private static List<String> Old_Mend_Frequency_Lore_Name = List.of();
     public static List<String> getOld_Mend_Frequency_Lore_Name() {
         return Old_Mend_Frequency_Lore_Name;
     }
@@ -134,62 +133,40 @@ public final class Slow_mending_re extends JavaPlugin implements CommandExecutor
     }
 
 
+    private static boolean countSuccessfulOnly;
+    public static boolean isCountSuccessfulOnly() { return countSuccessfulOnly; }
+    public static void setCountSuccessfulOnly(boolean value) { countSuccessfulOnly = value; }
+
+    public void ensureResources() {
+        saveDefaultConfig();
+        for (String resource : List.of("command.yml", "ExpansionCard/cardinfo.yml", "ExpansionCard/cardconfig.yml")) {
+            if (!new File(getDataFolder(), resource).isFile()) saveResource(resource, false);
+        }
+    }
+
     @Override
     public void onEnable() {
-        // Plugin startup logic
-        getLogger().info("SLMR:\n==================================\n        Slow mending re\n==================================");
-
-        //一言功能（误
-        try {System.out.println("\n" + new BufferedReader(new InputStreamReader(new URL("https://v1.jinrishici.com/rensheng.txt").openStream(), StandardCharsets.UTF_8)).readLine() + "\n");} catch (Exception ignored) {}
-
-
-        //正式开始加载
-        this.getLogger().info("正在加载插件...");
-
-        //传递超类
         SLM = this;
-
-        //注册监听器
-        Bukkit.getPluginManager().registerEvents(new MendEventListener(), this);
-        Bukkit.getPluginManager().registerEvents(new CardListener(),this);
-
-        //注册命令监听器
-        Bukkit.getPluginCommand("slowmending").setExecutor(new SLMCommand());
-
-        //注册补全
-        Bukkit.getPluginCommand("slowmending").setTabCompleter(new CommandTabCompleter());
-
-        //初始化配置文件:
-        //config配置
-        saveDefaultConfig();
-        //command配置
-        this.saveResource("command.yml", false);
-        //card配置
-        this.saveResource("ExpansionCard/cardinfo.yml", false);
-        this.saveResource("ExpansionCard/cardconfig.yml", false);
-
-        //注册card监听器
-        if (ExpansionCard.isEnable()){
-            Bukkit.getPluginManager().registerEvents(new CardListener(), this);
-        }
-
-        //开始加载配置
         try {
+            ensureResources();
             loadPL.loadPlugins();
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            getLogger().log(Level.SEVERE, "配置加载失败，插件已禁用。", e);
+            getServer().getPluginManager().disablePlugin(this);
+            return;
         }
-
-        //加载完成（大概
-        this.getLogger().info("加载完成！");
+        Bukkit.getPluginManager().registerEvents(new MendEventListener(), this);
+        // Register exactly once; the listener checks the current enable flag after reload.
+        Bukkit.getPluginManager().registerEvents(new CardListener(), this);
+        var command = Objects.requireNonNull(getCommand("slowmending"));
+        command.setExecutor(new SLMCommand());
+        command.setTabCompleter(new CommandTabCompleter());
+        getLogger().info("Slow Mending Re " + getDescription().getVersion() + " 已加载。");
     }
 
     @Override
     public void onDisable() {
-        // Plugin shutdown logic
-        //一言功能（误
-        try {System.out.println("\n" + new BufferedReader(new InputStreamReader(new URL("https://v1.jinrishici.com/rensheng.txt").openStream(), StandardCharsets.UTF_8)).readLine() + "\n");} catch (Exception ignored) {}
         getLogger().info("插件已卸载。");
+        SLM = null;
     }
-
 }

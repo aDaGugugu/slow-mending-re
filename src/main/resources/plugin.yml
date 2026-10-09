@@ -1,5 +1,5 @@
 name: slow_mending_re
-version: 'v2.1.0'
+version: '${project.version}'
 main: org.sbbpl.plugins.Slow_mending_re
 api-version: '1.20'
 author: super_boy_520
@@ -8,8 +8,11 @@ author: super_boy_520
 permissions:
   slowmending.command:
     default: op
+  slowmending.bypass:
+    description: Bypass slow mending and repair limits, including the global switch.
+    default: false
 commands:
   slowmending:
-    description: A plugin that mack mend slower and expensive than before.
+    description: Manage mending limits and expansion cards.
     aliases: slmend
     permission: slowmending.command

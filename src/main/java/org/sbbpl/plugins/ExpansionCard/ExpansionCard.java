@@ -1,218 +1,134 @@
 package org.sbbpl.plugins.ExpansionCard;
 
-import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.NamespacedKey;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
+import org.sbbpl.plugins.MendCount;
 import org.sbbpl.plugins.MendingItem;
 import org.sbbpl.plugins.Slow_mending_re;
 
-import java.io.File;
 import java.util.List;
-import java.util.Objects;
 
 public class ExpansionCard {
-    static Slow_mending_re SLM = Slow_mending_re.getSLM();
-    //卡片配置相关
-    //是否启用
-    private static boolean Enable;
-    public static boolean isEnable() {
-        return Enable;
-    }
-    public static void setEnable(boolean enable) {
-        Enable = enable;
-    }
-    //是否允许超出限制
-    private static boolean AllowBeyond;
-    public static boolean isAllowBeyond() {
-        return AllowBeyond;
-    }
-    public static void setAllowBeyond(boolean allowBeyond) {
-        AllowBeyond = allowBeyond;
-    }
-    //是否允许特殊值
-    private static boolean AllowSetSP;
-    public static boolean isAllowSetSP() {
-        return AllowSetSP;
-    }
-    public static void setAllowSetSP(boolean allowSetSP) {
-        AllowSetSP = allowSetSP;
-    }
-
-    //卡片数据
-    //卡片模式
-    private boolean cardMode;
-    //检测字符串，添加在第一行
-    public static String identifier = "\u0005\u0002\u0000";
-    //次数
+    public static final NamespacedKey MODE = MendingItem.key("card_mode");
+    public static final NamespacedKey FREQUENCY = MendingItem.key("card_frequency");
+    public static final String identifier = "\u0005\u0002\u0000";
+    private static boolean enabled, allowBeyond, allowSpecial, acceptLegacy;
+    static String name, setModeText, addModeText, frequencyText;
+    static List<String> usage = List.of();
+    private boolean valid;
+    private boolean setMode;
     private int frequency;
 
-    //是否为合法
-    private boolean isCard = true;
-
-
-    //名称
-    String name;
-    String set_mode;
-    String add_mode;
-    String frequencyName;
-
-    public ExpansionCard(ItemMeta itemMeta){
-        //读取配置
-        File configfile = new File(SLM.getDataFolder(), "ExpansionCard/cardinfo.yml");
-        YamlConfiguration config = YamlConfiguration.loadConfiguration(configfile);
-
-        name = config.getString("text.name");
-        set_mode = config.getString("text.set_mode");
-        add_mode = config.getString("text.add_mode");
-        frequencyName = config.getString("text.frequency");
-
-        //判断是否启用
-        if (!isEnable()) return;
-        //获取lore
-        List<String> lores;
-        //初步判断
-        if (itemMeta.hasLore()) {
-            lores = itemMeta.getLore();
-            assert lores != null;
-            if (!lores.get(0).equals(identifier)) isCard =false;
-        }else {
-            isCard = false;
-            return;
-        }
-
-        //尝试解析
-        try{
-            parseCard(lores);
-        } catch (Exception e) {
-            isCard = false;
-        }
-
-
+    public static void configure(boolean enable, boolean beyond, boolean special, boolean legacy,
+                                 String cardName, String setText, String addText, String frequencyName,
+                                 List<String> instructions) {
+        enabled = enable;
+        allowBeyond = beyond;
+        allowSpecial = special;
+        acceptLegacy = legacy;
+        name = cardName;
+        setModeText = setText;
+        addModeText = addText;
+        frequencyText = frequencyName;
+        usage = List.copyOf(instructions);
     }
 
-    private void parseCard(List<String> lores) {
-        //判断字符串
-        if (!lores.get(0).equals(identifier)){
-            isCard = false;
+    public static boolean isEnable() { return enabled; }
+    public static boolean isAllowBeyond() { return allowBeyond; }
+    public static boolean isAllowSetSP() { return allowSpecial; }
+    public boolean isCard() { return valid; }
+
+    public ExpansionCard(ItemMeta meta) {
+        if (meta == null) return;
+        var data = meta.getPersistentDataContainer();
+        if (data.has(MODE) || data.has(FREQUENCY)) {
+            if (!data.has(MODE, PersistentDataType.BYTE) || !data.has(FREQUENCY, PersistentDataType.INTEGER)) return;
+            Byte mode = data.get(MODE, PersistentDataType.BYTE);
+            Integer value = data.get(FREQUENCY, PersistentDataType.INTEGER);
+            if (mode == null || value == null || (mode != 0 && mode != 1)) return;
+            setMode = mode == 1;
+            frequency = value;
+            valid = !setMode || value >= -3;
             return;
         }
-
-        //循环lore，找目标项
-        for(String lore : lores) {
-            //卡片模式
-            if (lore.equals(set_mode)){
-                cardMode = true;
+        if (!acceptLegacy || !meta.hasLore()) return;
+        List<String> lore = meta.getLore();
+        if (lore == null || lore.isEmpty() || !identifier.equals(lore.get(0))) return;
+        int modes = 0, values = 0;
+        try {
+            for (String line : lore) {
+                if (line.equals(setModeText) || line.equals(addModeText)) {
+                    modes++;
+                    setMode = line.equals(setModeText);
+                }
+                if (line.startsWith(frequencyText)) {
+                    values++;
+                    frequency = Integer.parseInt(line.substring(frequencyText.length()).trim());
+                }
             }
-            if (lore.equals(add_mode)) {
-                cardMode = false;
-            }
-            //修改次数
-            if (lore.startsWith(frequencyName)) {
-                lore = lore.substring(frequencyName.length());
-                frequency = Integer.parseInt(lore);
-            }
+            valid = modes == 1 && values == 1 && (!setMode || frequency >= -3);
+        } catch (NumberFormatException ignored) {
+            valid = false;
         }
     }
 
-    public boolean use(Player player){
-        //使用
-        //是否启用
-        if (!isEnable()) return false;
-        //预处理
-        if (!isCard) {
-            player.sendMessage("§c无法解析拓展卡！");
+    public boolean use(Player player) {
+        if (!enabled || !valid) return false;
+        ItemStack card = player.getInventory().getItemInMainHand();
+        ExpansionCard held = new ExpansionCard(card.getItemMeta());
+        if (!held.valid || held.setMode != setMode || held.frequency != frequency) return false;
+        ItemStack target = player.getInventory().getItemInOffHand();
+        ItemMeta meta = target.getItemMeta();
+        if (!(meta instanceof Damageable) || !meta.hasEnchant(Enchantment.MENDING)) {
+            player.sendMessage("§c请将带有经验修补附魔的装备放在副手！");
             return false;
         }
-
-        //获取玩家物品
-        ItemStack itemStack = Objects.requireNonNull(player.getEquipment()).getItemInOffHand();
-        ItemMeta itemMeta = itemStack.getItemMeta();
-        if (itemMeta == null) {
-            //没有持有物品
-            player.sendMessage("§c请将要修复的物品放置在副手！");
-            return true;
-        }
-
-        //先检测当前装备是否有lore
-        if (!itemMeta.hasLore()) {
-            //没有lore
-            player.sendMessage("§c未检测到物品信息！");
-            return true;
-        }
-
-        //判断模式并进行赋值操作======================================
-        if (cardMode){
-            //如果为设置模式
-
-            //判断是否为特殊值
-            if (!isAllowSetSP()){
-                if (frequency<0) {
-                    player.sendMessage("§c无法为物品设置特殊次数！");
-                    return true;
+        String prefix = Slow_mending_re.getMend_Frequency_Lore_Name();
+        List<String> oldNames = Slow_mending_re.getOld_Mend_Frequency_Lore_Name();
+        try {
+            int result = frequency;
+            if (!setMode) {
+                int current;
+                try {
+                    current = MendingItem.getRemainderMendFrequency(meta, prefix, oldNames);
+                } catch (NoSuchFieldException e) {
+                    current = Slow_mending_re.getMax_Mend_Limit_Number();
+                }
+                result = MendCount.add(current, frequency);
+                if (result == current) {
+                    player.sendMessage("§e次数没有变化，未消耗拓展卡。");
+                    return false;
                 }
             }
-
-            //如果超出限制并禁止了超出
-            if (frequency > Slow_mending_re.getMax_Mend_Limit_Number() && !isAllowBeyond()) {
-                player.sendMessage("§c无法为超出限制的物品设置次数！");
-                return true;
+            MendCount.validate(result);
+            if (result < 0 && !allowSpecial) throw new IllegalArgumentException("当前不允许通过拓展卡设置无限次数或禁用修补。");
+            int maximum = Slow_mending_re.getMax_Mend_Limit_Number();
+            if (!allowBeyond && maximum >= 0 && result > maximum) {
+                throw new IllegalArgumentException("次数不能超出配置上限。");
             }
-            //设置玩家的次数
-            try {
-                itemMeta = MendingItem.setRemainderMendFrequency(itemMeta, Slow_mending_re.getMend_Frequency_Lore_Name(), frequency, Slow_mending_re.getOld_Mend_Frequency_Lore_Name());
-            } catch (NoSuchFieldException e) {
-                player.sendMessage("§c无法读取物品信息！");
-                return true;
+            if (setMode) {
+                try {
+                    if (MendingItem.getRemainderMendFrequency(meta, prefix, oldNames) == result) {
+                        player.sendMessage("§e次数没有变化，未消耗拓展卡。");
+                        return false;
+                    }
+                } catch (NoSuchFieldException ignored) { /* New item. */ }
             }
+            MendingItem.setRemainderMendFrequency(meta, prefix, result, oldNames);
+            target.setItemMeta(meta);
+            player.getInventory().setItemInOffHand(target);
+            card.setAmount(card.getAmount() - 1);
+            player.getInventory().setItemInMainHand(card);
+            player.sendMessage("§b剩余修补次数：" + MendCount.format(result));
+            return true;
+        } catch (IllegalArgumentException e) {
+            player.sendMessage("§c" + e.getMessage());
+            return false;
         }
-        else {
-            //如果为add模式
-
-            //当前次数
-            int nowFre;
-            //尝试获取次数
-            try {
-                nowFre = MendingItem.getRemainderMendFrequency(itemMeta,Slow_mending_re.getMend_Frequency_Lore_Name(),Slow_mending_re.getOld_Mend_Frequency_Lore_Name());
-            } catch (NoSuchFieldException e) {
-                return true;
-            }
-            //增加
-            nowFre += frequency;
-
-            //判断是否为特殊值
-            if (!isAllowSetSP()){
-                if (nowFre<0) {
-                    player.sendMessage("§c无法为物品设置特殊次数！");
-                    return true;
-                }
-            }
-            //判断是否超出
-            if (nowFre > Slow_mending_re.getMax_Mend_Limit_Number() && !isAllowBeyond()) {
-                player.sendMessage("§c无法为超出限制的物品设置次数！");
-                return true;
-            }
-            //修改玩家次数
-            try {
-                itemMeta = MendingItem.addRemainderMendFrequency(itemMeta,Slow_mending_re.getMend_Frequency_Lore_Name(),frequency,Slow_mending_re.getOld_Mend_Frequency_Lore_Name());
-            }catch (Exception e){
-                player.sendMessage("§c无法读取物品信息！");
-                return true;
-            }
-        }
-        //赋值结束================================================
-
-        //把物品给玩家
-        itemStack.setItemMeta(itemMeta);
-        player.getEquipment().setItemInOffHand(itemStack);
-
-        //清除卡片
-        ItemStack card = player.getEquipment().getItemInMainHand();
-        card.setAmount(card.getAmount()-1);
-        player.getEquipment().setItemInMainHand(card);
-
-
-        return true;
     }
-
 }

@@ -1,0 +1,180 @@
+{
+  "date": "2026-10-03",
+  "plugin": "slow-mending-re-2.2.1.jar",
+  "sha256": "4ef09214de25bbd84bed19107ef77bb4647eb95e5ad485251dcb04b713dada23",
+  "api_baseline": "1.20-R0.1-SNAPSHOT",
+  "class_major_version": 61,
+  "unit_tests": 17,
+  "assertions_per_server": 46,
+  "server_versions": 21,
+  "results": [
+    {
+      "version": "1.20",
+      "build": 17,
+      "java": 17,
+      "exit_code": 0,
+      "result": "PASS 46 assertions",
+      "passed": true
+    },
+    {
+      "version": "1.20.1",
+      "build": 196,
+      "java": 17,
+      "exit_code": 0,
+      "result": "PASS 46 assertions",
+      "passed": true
+    },
+    {
+      "version": "1.20.2",
+      "build": 318,
+      "java": 17,
+      "exit_code": 0,
+      "result": "PASS 46 assertions",
+      "passed": true
+    },
+    {
+      "version": "1.20.4",
+      "build": 499,
+      "java": 17,
+      "exit_code": 0,
+      "result": "PASS 46 assertions",
+      "passed": true
+    },
+    {
+      "version": "1.20.5",
+      "build": 22,
+      "java": 21,
+      "exit_code": 0,
+      "result": "PASS 46 assertions",
+      "passed": true
+    },
+    {
+      "version": "1.20.6",
+      "build": 151,
+      "java": 21,
+      "exit_code": 0,
+      "result": "PASS 46 assertions",
+      "passed": true
+    },
+    {
+      "version": "1.21",
+      "build": 130,
+      "java": 21,
+      "exit_code": 0,
+      "result": "PASS 46 assertions",
+      "passed": true
+    },
+    {
+      "version": "1.21.1",
+      "build": 133,
+      "java": 21,
+      "exit_code": 0,
+      "result": "PASS 46 assertions",
+      "passed": true
+    },
+    {
+      "version": "1.21.3",
+      "build": 83,
+      "java": 21,
+      "exit_code": 0,
+      "result": "PASS 46 assertions",
+      "passed": true
+    },
+    {
+      "version": "1.21.4",
+      "build": 232,
+      "java": 21,
+      "exit_code": 0,
+      "result": "PASS 46 assertions",
+      "passed": true
+    },
+    {
+      "version": "1.21.5",
+      "build": 114,
+      "java": 21,
+      "exit_code": 0,
+      "result": "PASS 46 assertions",
+      "passed": true
+    },
+    {
+      "version": "1.21.6",
+      "build": 48,
+      "java": 21,
+      "exit_code": 0,
+      "result": "PASS 46 assertions",
+      "passed": true
+    },
+    {
+      "version": "1.21.7",
+      "build": 32,
+      "java": 21,
+      "exit_code": 0,
+      "result": "PASS 46 assertions",
+      "passed": true
+    },
+    {
+      "version": "1.21.8",
+      "build": 60,
+      "java": 21,
+      "exit_code": 0,
+      "result": "PASS 46 assertions",
+      "passed": true
+    },
+    {
+      "version": "1.21.9",
+      "build": 59,
+      "java": 21,
+      "exit_code": 0,
+      "result": "PASS 46 assertions",
+      "passed": true
+    },
+    {
+      "version": "1.21.10",
+      "build": 130,
+      "java": 21,
+      "exit_code": 0,
+      "result": "PASS 46 assertions",
+      "passed": true
+    },
+    {
+      "version": "1.21.11",
+      "build": 132,
+      "java": 21,
+      "exit_code": 0,
+      "result": "PASS 46 assertions",
+      "passed": true
+    },
+    {
+      "version": "26.1.1",
+      "build": 29,
+      "java": 25,
+      "exit_code": 0,
+      "result": "PASS 46 assertions",
+      "passed": true
+    },
+    {
+      "version": "26.1.2",
+      "build": 74,
+      "java": 25,
+      "exit_code": 0,
+      "result": "PASS 46 assertions",
+      "passed": true
+    },
+    {
+      "version": "26.2",
+      "build": 129,
+      "java": 25,
+      "exit_code": 0,
+      "result": "PASS 46 assertions",
+      "passed": true
+    },
+    {
+      "version": "26.3",
+      "build": 143,
+      "java": 25,
+      "exit_code": 0,
+      "result": "PASS 46 assertions",
+      "passed": true
+    }
+  ]
+}

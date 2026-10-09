@@ -1,133 +1,126 @@
 package org.sbbpl.plugins;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-public class MendingItem {
-    //这是一个提供关于lore存储的数据的函数的类
+public final class MendingItem {
+    public static final NamespacedKey REMAINING = key("remaining_mends");
+    private static final NamespacedKey LORE_PREFIX = key("lore_prefix");
+    private static final NamespacedKey ORIGINAL_NAME = key("original_name");
+    private static final NamespacedKey BROKEN_NAME = key("broken_name");
+    private static final GsonComponentSerializer JSON = GsonComponentSerializer.gson();
 
-    //获取剩余修补次数
-    public static int getRemainderMendFrequency(ItemMeta itemMeta ,String mendFrequencyLoreName ,List<String> oldNames) throws NoSuchFieldException {
-        //判断是否存在lore
-        if (!itemMeta.hasLore()) throw new NoSuchFieldException();
-        //获取lore列表
-        List<String> rawLore = itemMeta.getLore();
-        //遍历列表，找到存储mend数据的lore
-        int frequency;//定义数据变量
-        for (String lore : rawLore){
-            //寻找名称
-            if (lore.startsWith(mendFrequencyLoreName)){//找到
-                //截取数据并进行转换
-                frequency = Integer.parseInt(lore.substring(mendFrequencyLoreName.length()));
-                return frequency;
+    private MendingItem() {}
+
+    public static NamespacedKey key(String name) {
+        return Objects.requireNonNull(NamespacedKey.fromString("slow_mending_re:" + name));
+    }
+
+    public static int getRemainderMendFrequency(ItemMeta meta, String prefix, List<String> oldNames)
+            throws NoSuchFieldException {
+        var data = meta.getPersistentDataContainer();
+        if (data.has(REMAINING)) {
+            if (!data.has(REMAINING, PersistentDataType.INTEGER)) {
+                throw new IllegalArgumentException("物品的持久化次数类型无效。");
             }
-            //寻找旧名称
-            for (String oldname : oldNames){
-                if (lore.startsWith(oldname)){//找到
-                    //读取名称
-                    frequency = Integer.parseInt(lore.substring(oldname.length()));
-                    return frequency;
+            Integer value = data.get(REMAINING, PersistentDataType.INTEGER);
+            if (value == null) throw new IllegalArgumentException("物品的持久化次数类型无效。");
+            return MendCount.validate(value);
+        }
+        return readLegacyCount(meta.getLore(), prefix, oldNames);
+    }
+
+    static int readLegacyCount(List<String> lore, String prefix, List<String> oldNames)
+            throws NoSuchFieldException {
+        if (lore == null) throw new NoSuchFieldException("物品没有修补次数。");
+        for (String line : lore) {
+            for (String candidate : prefixes(prefix, oldNames, null)) {
+                if (line.startsWith(candidate)) {
+                    try {
+                        return MendCount.parseSetting(line.substring(candidate.length()));
+                    } catch (IllegalArgumentException e) {
+                        throw new IllegalArgumentException("物品 Lore 中的修补次数无效。", e);
+                    }
                 }
             }
         }
-        throw new NoSuchFieldException();//未找到对应lore
-
+        throw new NoSuchFieldException("物品没有修补次数。");
     }
 
-    //创建一个lore用于存储剩余次数并赋值
-    public static ItemMeta createRemainderMendFrequency(ItemMeta itemMeta ,String mendFrequencyLoreName,int initialFrequency){
-        List<String> lore;
-        //判断是否存在lore
-        //获取lore列表
-        if (!itemMeta.hasLore()) lore = new LinkedList<>();
-        else lore = itemMeta.getLore();
-        //在列表最后插入用于存储的lore
-        lore.add(mendFrequencyLoreName+initialFrequency);
-        //赋值给itemmate
-        itemMeta.setLore(lore);
-        return itemMeta;
+    public static ItemMeta createRemainderMendFrequency(ItemMeta meta, String prefix, int value) {
+        return writeCount(meta, prefix, value, Slow_mending_re.getOld_Mend_Frequency_Lore_Name());
     }
 
-    //将剩余次数设置为一个数
-    public static ItemMeta setRemainderMendFrequency(ItemMeta itemMeta ,String mendFrequencyLoreName ,int setNum ,List<String> oldNames) throws NoSuchFieldException {
-        //判断是否存在lore
-        if (!itemMeta.hasLore()) throw new NoSuchFieldException();
-        //获取lore列表
-        List<String> rawLore = itemMeta.getLore();
-        //遍历列表，找到存储mend数据的lore
-        for (int i = 0 ; i <= rawLore.size()-1 ;i++){
-            String lore = rawLore.get(i);
-            if (lore.startsWith(mendFrequencyLoreName)){//找到
-                //构建新lore
-                String newlore;
-                newlore = lore.substring(0,mendFrequencyLoreName.length())+setNum;
-                //替换原lore
-                rawLore.set(i,newlore);
-                itemMeta.setLore(rawLore);
-                return itemMeta;
-            }
-            //没找到
-            //寻找旧名称
-            for (String oldname : oldNames){
-                if (lore.startsWith(oldname)){//找到
-                    //删除原名称
-                    rawLore.remove(i);
-                    itemMeta.setLore(rawLore);
-                    return createRemainderMendFrequency(itemMeta,mendFrequencyLoreName,setNum);
-                }
-            }
+    public static ItemMeta setRemainderMendFrequency(ItemMeta meta, String prefix, int value,
+                                                    List<String> oldNames) {
+        return writeCount(meta, prefix, value, oldNames);
+    }
+
+    public static ItemMeta addRemainderMendFrequency(ItemMeta meta, String prefix, int delta,
+                                                    List<String> oldNames) throws NoSuchFieldException {
+        return writeCount(meta, prefix, MendCount.add(getRemainderMendFrequency(meta, prefix, oldNames), delta), oldNames);
+    }
+
+    private static ItemMeta writeCount(ItemMeta meta, String prefix, int value, List<String> oldNames) {
+        MendCount.validate(value);
+        if (prefix == null || prefix.isBlank()) throw new IllegalArgumentException("次数 Lore 前缀不能为空。");
+        var data = meta.getPersistentDataContainer();
+        List<String> recognized = prefixes(prefix, oldNames, data.get(LORE_PREFIX, PersistentDataType.STRING));
+        // Preserve other plugins' rich lore components, not only their plain text.
+        List<Component> lore = meta.lore() == null ? new ArrayList<>() : new ArrayList<>(meta.lore());
+        lore.removeIf(line -> recognized.stream().anyMatch(
+                candidate -> LegacyComponentSerializer.legacySection().serialize(line).startsWith(candidate)));
+        lore.add(LegacyComponentSerializer.legacySection().deserialize(prefix + MendCount.format(value)));
+        meta.lore(lore);
+        data.set(REMAINING, PersistentDataType.INTEGER, value);
+        data.set(LORE_PREFIX, PersistentDataType.STRING, prefix);
+        if (value != 0 && value != -3) restoreName(meta);
+        return meta;
+    }
+
+    private static List<String> prefixes(String prefix, List<String> oldNames, String stored) {
+        List<String> result = new ArrayList<>();
+        if (prefix != null && !prefix.isBlank()) result.add(prefix);
+        if (oldNames != null) oldNames.stream().filter(s -> s != null && !s.isBlank()).forEach(result::add);
+        if (stored != null && !stored.isBlank()) result.add(stored);
+        result.sort((a, b) -> Integer.compare(b.length(), a.length()));
+        return result;
+    }
+
+    public static ItemMeta changeBroken(ItemMeta meta, Player player, boolean changeName,
+                                       String prefix, boolean sendMessage, String message) {
+        if (sendMessage && message != null && !message.isEmpty()) player.sendMessage(message);
+        var data = meta.getPersistentDataContainer();
+        if (changeName && !data.has(BROKEN_NAME)) {
+            Component original = meta.displayName();
+            data.set(ORIGINAL_NAME, PersistentDataType.STRING, original == null ? "" : JSON.serialize(original));
+            Component renamed = LegacyComponentSerializer.legacySection().deserialize(prefix)
+                    .append(original == null ? Component.text("工具") : original);
+            meta.displayName(renamed);
+            data.set(BROKEN_NAME, PersistentDataType.STRING, JSON.serialize(renamed));
         }
-        throw new NoSuchFieldException();//未找到对应lore
+        return meta;
     }
 
-    //将剩余次数加（减）去一个数
-    public static ItemMeta addRemainderMendFrequency(ItemMeta itemMeta ,String mendFrequencyLoreName ,int addNum, List<String> oldName) throws NoSuchFieldException {
-        int num = getRemainderMendFrequency(itemMeta,mendFrequencyLoreName,oldName);
-        num += addNum;
-        return setRemainderMendFrequency(itemMeta,mendFrequencyLoreName,num,oldName);
-    }
-
-    //将玩家的装备转换为破损状态
-    public static ItemMeta changeBroken(ItemMeta itemMeta, Player player, boolean changeName, String brokePrefix,boolean sendmsg, String brokenMessage){
-        //发送破损信息
-        if (sendmsg) player.sendMessage(brokenMessage);
-
-        //判断玩家是否更改工具的名称
-        if (changeName){
-            if (!itemMeta.hasDisplayName()) {//如果没有
-                String toolName = brokePrefix + "工具";
-                itemMeta.setDisplayName(toolName);
-                return itemMeta;
-            }
-
-            //获取名称并添加前缀
-            String toolName = itemMeta.getDisplayName();
-            toolName = brokePrefix + toolName;
-            itemMeta.setDisplayName(toolName);
-            return itemMeta;
+    private static void restoreName(ItemMeta meta) {
+        var data = meta.getPersistentDataContainer();
+        String broken = data.get(BROKEN_NAME, PersistentDataType.STRING);
+        String original = data.get(ORIGINAL_NAME, PersistentDataType.STRING);
+        if (broken == null || original == null) return;
+        // Keep any subsequent anvil/plugin rename made by the player.
+        if (Objects.equals(meta.displayName(), JSON.deserialize(broken))) {
+            meta.displayName(original.isEmpty() ? null : JSON.deserialize(original));
         }
-        return itemMeta;
-    }
-
-    public static boolean checkWhitelist(ItemMeta itemMeta ,List<String> name){
-        return false;
-    }
-
-    public static boolean isHasMendFrequency(ItemMeta itemMeta,String mendFrequencyLoreName){
-        //判断是否存在lore
-        if (!itemMeta.hasLore()) return false;
-        //获取lore列表
-        List<String> rawLore = itemMeta.getLore();
-        //遍历列表，找到存储mend数据的lore
-        for (int i = 0 ; i <= rawLore.size()-1 ;i++) {
-            String lore = rawLore.get(i);
-            if (lore.startsWith(mendFrequencyLoreName)) {//找到
-                return true;
-            }
-        }
-        return false;
+        data.remove(BROKEN_NAME);
+        data.remove(ORIGINAL_NAME);
     }
 }

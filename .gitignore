@@ -111,3 +111,7 @@ buildNumber.properties
 
 # Common working directory
 run/
+
+# Python integration test runner
+__pycache__/
+*.pyc

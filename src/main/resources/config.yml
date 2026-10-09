@@ -1,6 +1,6 @@
 #这是插件的配置文件，所有的设置都在这里
 Setting:
-  Debug_Mode: true
+  Debug_Mode: false
   #这个选项可以完全禁用或启用经验修补，当设置为true时，经验修补可以使用，当设置为false时，经验修补没有作用
   AHI_Mend: true
 
@@ -8,7 +8,7 @@ Setting:
     #是否启用缓慢修补功能
     Enable: true
 
-    #经验修补的减弱系数，将决定经验修补消耗的经验量。数字越大消耗越多，换算大约为“1/[最大值]”
+    #修补成功概率为 1 / Mitigation_Factor；必须 >= 1。失败的修补事件被取消，经验由服务端正常处理。
     Mitigation_Factor: 5
 
   #限制经验修补次数
@@ -17,8 +17,12 @@ Setting:
     #是否启用，启用将限制经验修补的修补次数，如果到达次数物品将不会被修补
     Enable: true
 
-    #最大修补次数，此参数为可触发的修补次数，玩家吸收经验就会增加，而不是触发修补
+    #初始修补次数。配置仍使用整数；-1 无限（遵循减速设置），-2 无限不减速，-3 禁用。
+    #游戏内显示文字状态；set 命令可直接使用“无限”“无限不减速”“禁用”。
     Max_Number: 1000
+
+    #false 保留旧版按修补尝试扣次；true 仅本插件放行的修补扣次。
+    Count_Successful_Only: false
 
     #在修补次数耗尽后，是否给玩家发送信息
     Deactivate_Message: true
@@ -32,10 +36,10 @@ Setting:
     #更改名字前缀的内容
     Broken_Prefix: §7破损的-
 
-    #这是限制提示的内容，请不要在开服后随意更改！！！这条内容决定了插件识别的内容！！！
+    #次数保存在 PDC 中，此处仅控制显示。升级前仅有 Lore 的旧物品仍需要识别前缀。
     #如果更改需要将旧名称填入“Old_Mend_Frequency_Lore_Name”内
     Mend_Frequency_Lore_Name: §9剩余修补次数：
 
-    #旧名称，列表内的名称将与正常名称一起生效减少次数，但无法进行其他操作。
-    Old_Mend_Frequency_Lore_Name:
+    #旧物品会自动迁移，旧前缀同样支持查询、命令和拓展卡。
+    Old_Mend_Frequency_Lore_Name: []
     #- "123："

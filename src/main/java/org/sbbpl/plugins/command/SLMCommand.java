@@ -1,257 +1,117 @@
 package org.sbbpl.plugins.command;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
+import org.sbbpl.plugins.MendCount;
+import org.sbbpl.plugins.MendingItem;
 import org.sbbpl.plugins.Slow_mending_re;
-import org.sbbpl.plugins.command.commands.*;
+import org.sbbpl.plugins.command.commands.com_give;
+import org.sbbpl.plugins.loadPL;
+
+import java.io.File;
+import java.util.Locale;
+import java.util.logging.Level;
 
 public class SLMCommand implements CommandExecutor {
-
-    Slow_mending_re SLM = Slow_mending_re.getSLM();
-
     @Override
-    public boolean onCommand(CommandSender commandSender, Command command, String label, String[] args) {
-        //检查是否有权限
-        if (commandSender instanceof Player) {
-            Player player = (Player) commandSender;
-            if (!player.hasPermission("slowmending.command")){
-                commandSender.sendMessage("§c你没有权限！");
-                return false;
-            }
-        }
-
-        if (args.length == 0){
-            if (commandSender instanceof Player) {
-                com_help.playerHelp((Player) commandSender);
-            } else {
-                com_help.consHelp();
-            }
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (!sender.hasPermission("slowmending.command")) {
+            sender.sendMessage("§c你没有权限！");
             return true;
         }
-
-        //开始命令判断
-        switch (args[0]){
-            case ("reload") ->{
-                if (commandSender instanceof Player){
-                    com_reload.playerReload((Player) commandSender);
-                } else if (commandSender instanceof ConsoleCommandSender) {
-                    com_reload.consReload();
+        String sub = args.length == 0 ? "help" : args[0].toLowerCase(Locale.ROOT);
+        Slow_mending_re plugin = Slow_mending_re.getSLM();
+        try {
+            switch (sub) {
+                case "reload" -> {
+                    require(args.length == 1, "/slmend reload");
+                    try {
+                        plugin.ensureResources();
+                        loadPL.loadPlugins();
+                        plugin.reloadConfig();
+                        sender.sendMessage("§b配置已重载。");
+                    } catch (Exception e) {
+                        plugin.getLogger().log(Level.WARNING, "重载失败，保留之前的有效配置。", e);
+                        sender.sendMessage("§c重载失败，保留之前的有效配置：" + e.getMessage());
+                    }
                 }
-                return true;
+                case "version" -> sender.sendMessage("§bSlow Mending Re " + plugin.getDescription().getVersion()
+                        + " | Paper 1.20–26.3 | 原作者 super_boy_520");
+                case "set", "add", "info" -> edit(sender, sub, args);
+                case "givecard" -> {
+                    GiveCardArguments card = GiveCardArguments.parse(args);
+                    Player target = player(card.playerName());
+                    com_give.give(target, card.frequency(), card.setMode(), card.quantity());
+                    sender.sendMessage("§b已给予 " + target.getName() + " " + card.quantity() + " 张拓展卡："
+                            + (card.setMode() ? "设置为 " + MendCount.format(card.frequency())
+                            : MendCount.formatDelta(card.frequency())) + "。");
+                }
+                default -> {
+                    var config = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), "command.yml"));
+                    for (String line : config.getStringList("Command.text.help")) sender.sendMessage(line);
+                    // Include this for existing command.yml files, which are intentionally not overwritten.
+                    sender.sendMessage("§b/slmend info <player> [main|off] - 查看修补次数及模式。");
+                    sender.sendMessage("§b/slmend set <player> <次数|无限|无限不减速|禁用> [main|off]");
+                    sender.sendMessage("§b" + GiveCardArguments.USAGE + " - 发放拓展卡，先选择 set 或 add。");
+                    sender.sendMessage("§bset 模式的拓展卡也支持上述名称；add 只接受增减整数，例如 -1 表示减少 1 次。");
+                }
             }
-            case ("version") ->{
-                if (commandSender instanceof Player){
-                    com_version.playerVersion((Player) commandSender);
-                } else {
-                    com_version.consVersion();
-                }
-                return true;
-            }
-            case ("set") ->{
-                //检测主副手按长度
-                boolean hand;
-                //没变量
-                System.out.println(args.length);
-                if (args.length == 3) hand = true;
-                //有变量
-                else if (args.length == 4) {
-                    //如果是主手
-                    if (args[3].equals("main")) {
-                        hand = true;
-                    }
-                    //如果是副手
-                    else if (args[3].equals("off")) {
-                        hand = false;
-                    }
-                    //都不是
-                    else {
-                        if (commandSender instanceof Player) {
-                            commandSender.sendMessage("§c命令参数错误！");
-                        } else {
-                            SLM.getLogger().info("命令参数错误!");
-                        }
-                        return true;
-                    }
-                }else {
-                    if (commandSender instanceof Player) {
-                        commandSender.sendMessage("§c命令长度错误！");
-                    } else {
-                        SLM.getLogger().info("命令长度错误!");
-                    }
-                    return true;
-                }
-
-                //读取玩家
-                Player targetPlayer;
-                try {
-                    targetPlayer = SLM.getServer().getPlayer(args[1]);
-                    if (targetPlayer == null){
-                        if (commandSender instanceof Player) {
-                            commandSender.sendMessage("§c玩家未找到！");
-                        } else {
-                            SLM.getLogger().info("玩家未找到!");
-                        }
-                        return true;
-                    }
-                }catch (Exception e){
-                    if (commandSender instanceof Player) {
-                        commandSender.sendMessage("§c玩家未找到！");
-                    } else {
-                        SLM.getLogger().info("玩家未找到!");
-                    }
-                    return true;
-                }
-
-                //读取次数
-                int num;
-                try {
-                    num = Integer.parseInt(args[2]);
-                }catch (Exception e){
-                    if (commandSender instanceof Player) {
-                        commandSender.sendMessage("§c次数错误！");
-                    } else {
-                        SLM.getLogger().info("次数错误!");
-                    }
-                    return true;
-                }
-
-                //调用
-                if (commandSender instanceof Player) {
-                    com_set.playerSet(targetPlayer,num,(Player)commandSender,hand);
-                } else {
-                    com_set.consSet(targetPlayer,num,hand);
-                }
-                return true;
-            }
-            case ("add") ->{
-                //检测主副手按长度
-                boolean hand;
-                //没变量
-                if (args.length == 3) hand = true;
-                //有变量
-                else if (args.length == 4) {
-                    //如果是主手
-                    if (args[3].equals("main")) {
-                        hand = true;
-                    }
-                    //如果是副手
-                    else if (args[3].equals("off")) {
-                        hand = false;
-                    }
-                    //都不是
-                    else {
-                        if (commandSender instanceof Player) {
-                            commandSender.sendMessage("§c命令参数错误！");
-                        } else {
-                            SLM.getLogger().info("命令参数错误!");
-                        }
-                        return true;
-                    }
-                }else {
-                    if (commandSender instanceof Player) {
-                        commandSender.sendMessage("§c命令长度错误！");
-                    } else {
-                        SLM.getLogger().info("命令长度错误!");
-                    }
-                    return true;
-                }
-
-                //读取玩家
-                Player targetPlayer = null;
-                try {
-                    targetPlayer = SLM.getServer().getPlayer(args[1]);
-                    if (targetPlayer == null){
-                        if (commandSender instanceof Player) {
-                            commandSender.sendMessage("§c玩家未找到！");
-                        } else {
-                            SLM.getLogger().info("玩家未找到!");
-                        }
-                        return true;
-                    }
-                }catch (Exception e){
-                    if (commandSender instanceof Player) {
-                        commandSender.sendMessage("§c玩家未找到！");
-                    } else {
-                        SLM.getLogger().info("玩家未找到!");
-                    }
-                }
-
-                //读取次数
-                int num;
-                try {
-                    num = Integer.parseInt(args[2]);
-                }catch (Exception e){
-                    if (commandSender instanceof Player) {
-                        commandSender.sendMessage("§c次数错误！");
-                    } else {
-                        SLM.getLogger().info("次数错误!");
-                    }
-                    return true;
-                }
-
-                //调用
-                if (commandSender instanceof Player) {
-                    com_add.playerAdd(targetPlayer,num,(Player)commandSender,hand);
-                } else {
-                    com_add.consAdd(targetPlayer,num,hand);
-                }
-                return true;
-            }
-            //give
-            case ("givecard") ->{
-                //检测sender
-                if (!(commandSender instanceof Player)){
-                    SLM.getLogger().info("不能为非玩家执行！");
-                    return true;
-                }
-
-                //检测长度
-                if (args.length != 5){
-                    commandSender.sendMessage("§c命令长度错误！");
-                    return true;
-                }
-
-                //检测主手
-                if (((Player) commandSender).getEquipment().getItemInMainHand().getType() != Material.AIR){
-                    commandSender.sendMessage("§c请将移除主手物品。");
-                    return true;
-                }
-                //获取玩家并执行
-                try{
-                    Player player = Bukkit.getPlayer(args[1]);
-                    int num = Integer.parseInt(args[2]);
-                    int frequency = Integer.parseInt(args[3]);
-                    boolean isset;
-                    if (args[4].equals("set")) {
-                        isset = true;
-                    } else if (args[4].equals("add")) {
-                        isset = false;
-                    } else {
-                        commandSender.sendMessage("§c模式参数错误！");
-                        return true;
-                    }
-                    com_give.give(player, frequency, isset, num);
-                    commandSender.sendMessage("§b成功给予物品。");
-                    return true;
-                }catch (Exception e){
-                    commandSender.sendMessage("§c参数错误！");
-                    return true;
-                }
-
-            }
-            default -> {
-                if (commandSender instanceof Player) {
-                    com_help.playerHelp((Player) commandSender);
-                } else {
-                    com_help.consHelp();
-                }
-                return true;
-            }
+        } catch (NumberFormatException e) {
+            sender.sendMessage("§c数量及 add 增减量必须为 32 位整数；只有 set 支持修补模式名称。");
+        } catch (IllegalArgumentException e) {
+            sender.sendMessage("§c" + e.getMessage());
         }
+        return true;
+    }
+
+    private void edit(CommandSender sender, String mode, String[] args) {
+        boolean info = mode.equals("info");
+        int base = info ? 2 : 3;
+        require(args.length == base || args.length == base + 1,
+                "/slmend " + mode + " <player> " + (info ? "" : mode.equals("set")
+                        ? "<次数|无限|无限不减速|禁用> " : "<增减次数> ") + "[main|off]");
+        Player target = player(args[1]);
+        String hand = args.length > base ? args[base].toLowerCase(Locale.ROOT) : "main";
+        require(hand.equals("main") || hand.equals("off"), "手持位置必须为 main 或 off。");
+        ItemStack item = hand.equals("main") ? target.getInventory().getItemInMainHand() : target.getInventory().getItemInOffHand();
+        var meta = item.getItemMeta();
+        require(meta instanceof Damageable, "目标手中必须是具有耐久度的装备。");
+        String prefix = Slow_mending_re.getMend_Frequency_Lore_Name();
+        var oldNames = Slow_mending_re.getOld_Mend_Frequency_Lore_Name();
+        int value;
+        if (mode.equals("set")) {
+            value = MendCount.parseSetting(args[2]);
+        } else {
+            try {
+                value = MendingItem.getRemainderMendFrequency(meta, prefix, oldNames);
+            } catch (NoSuchFieldException e) {
+                value = Slow_mending_re.getMax_Mend_Limit_Number();
+            }
+            if (!info) value = MendCount.add(value, Integer.parseInt(args[2]));
+        }
+        if (!info) {
+            MendingItem.setRemainderMendFrequency(meta, prefix, value, oldNames);
+            item.setItemMeta(meta);
+            if (hand.equals("main")) target.getInventory().setItemInMainHand(item);
+            else target.getInventory().setItemInOffHand(item);
+        }
+        sender.sendMessage("§b" + target.getName() + " " + (hand.equals("main") ? "主手" : "副手")
+                + " 剩余修补次数：" + MendCount.format(value));
+    }
+
+    private static Player player(String name) {
+        Player player = Bukkit.getPlayerExact(name);
+        require(player != null, "未找到在线玩家：" + name);
+        return player;
+    }
+
+    private static void require(boolean condition, String message) {
+        if (!condition) throw new IllegalArgumentException(message);
     }
 }

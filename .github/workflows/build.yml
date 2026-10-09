@@ -1,0 +1,35 @@
+name: Build
+
+on:
+  push:
+    branches: [main, 'compat/**']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        java: ['17', '21', '25']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java }}
+          cache: maven
+      - name: Build plugin and run unit tests
+        run: mvn --batch-mode --no-transfer-progress clean install
+      - name: Compile the Paper integration test plugin
+        run: mvn --batch-mode --no-transfer-progress -f integration-tests/pom.xml package
+      - uses: actions/upload-artifact@v4
+        if: matrix.java == '17'
+        with:
+          name: slow-mending-re-2.2.3-paper-1.20-26.3
+          path: target/slow-mending-re-2.2.3.jar
+          if-no-files-found: error

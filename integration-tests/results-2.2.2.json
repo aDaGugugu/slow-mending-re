@@ -1,0 +1,30 @@
+{
+  "plugin": "slow-mending-re-2.2.2.jar",
+  "sha256": "58c9daca30f6c6f1e4ae33a683b6592706476662ef69d46ed8e0969cd5a9119f",
+  "results": [
+    {
+      "version": "1.20",
+      "build": 17,
+      "java": 17,
+      "exit_code": 0,
+      "result": "PASS 72 assertions",
+      "passed": true
+    },
+    {
+      "version": "1.20.6",
+      "build": 151,
+      "java": 21,
+      "exit_code": 0,
+      "result": "PASS 72 assertions",
+      "passed": true
+    },
+    {
+      "version": "26.3",
+      "build": 143,
+      "java": 25,
+      "exit_code": 0,
+      "result": "PASS 72 assertions",
+      "passed": true
+    }
+  ]
+}

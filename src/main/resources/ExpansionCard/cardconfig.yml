@@ -8,3 +8,6 @@ ExpansionCard:
 
   #是否允许设定特殊值
   AllowSetSP: true
+
+  #兼容旧版通过 Lore 标记的拓展卡。旧卡用完后可关闭；新卡使用 PDC，不受名称修改影响。
+  AcceptLegacyCards: true
